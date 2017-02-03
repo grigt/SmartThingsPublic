@@ -46,7 +46,7 @@ def deviceDiscovery() {
 
 	ssdpDiscover()
 	verifyDevices()
-
+    
 	return dynamicPage(name: "deviceDiscovery", title: "Discovery Started!", nextPage: "", refreshInterval: 5, install: true, uninstall: true) {
 		section("Please wait while we discover your UPnP Device. Discovery can take five minutes or more, so sit back and relax! Select your device below once discovered.") {
 			input "selectedDevices", "enum", required: false, title: "Select Devices (${options.size() ?: 0} found)", multiple: true, options: options
@@ -92,7 +92,7 @@ Map verifiedDevices() {
 	def devices = getVerifiedDevices()
 	def map = [:]
 	devices.each {
-		def value = it.value.name ?: "UPnP Device ${it.value.ssdpUSN.split(':')[1][-3..-1]}"
+		def value = it.value.name ?: "grigt Device ${it.value.ssdpUSN.split(':')[1][-3..-1]}"
 		def key = it.value.mac
 		map["${key}"] = value
 	}
@@ -133,9 +133,9 @@ def addDevices() {
 		}
 
 		if (!d) {
-			log.debug "grigt UPnP Device with dni: ${selectedDevice.value.mac}"
-			addChildDevice("smartthings", "grigt UPnP Device", selectedDevice.value.mac, selectedDevice?.value.hub, [
-				"label": selectedDevice?.value?.name ?: "grigt UPnP Device",
+			log.debug "grigt Device with dni: ${selectedDevice.value.mac}"
+			addChildDevice(selectedDevice?.value?.manufacturer ?: "grigt", selectedDevice?.value?.model ?: "grigt Device", selectedDevice.value.mac, selectedDevice?.value.hub, [
+				"label": selectedDevice?.value?.name ?: "grigt Device",
 				"data": [
 					"mac": selectedDevice.value.mac,
 					"ip": selectedDevice.value.networkAddress,
@@ -175,7 +175,7 @@ void deviceDescriptionHandler(physicalgraph.device.HubResponse hubResponse) {
 	def devices = getDevices()
 	def device = devices.find { it?.key?.contains(body?.device?.UDN?.text()) }
 	if (device) {
-		device.value << [name: body?.device?.roomName?.text(), model:body?.device?.modelName?.text(), serialNumber:body?.device?.serialNum?.text(), verified: true]
+		device.value << [name: body?.device?.roomName?.text(), model:body?.device?.modelName?.text(), serialNumber:body?.device?.serialNum?.text(), manufacturer:body?.device?.manufacturer?.text(), verified: true]
 	}
 }
 
